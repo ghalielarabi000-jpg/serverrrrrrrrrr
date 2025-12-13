@@ -1,45 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Mini Profile</title>
-  <style>
-    body { font-family: Arial; background:#121212; color:white; text-align:center; }
-    .card { width:350px; margin:auto; padding:20px; background:#1d1d1d; border-radius:15px; }
-    img { width:120px; height:120px; border-radius:50%; object-fit:cover; margin-bottom:10px; }
-    input { margin:10px 0; padding:8px; width:100%; }
-    button { padding:10px 15px; background:#00eaff; border:none; cursor:pointer; border-radius:8px; }
-  </style>
+<meta charset="UTF-8">
+<title>Mini Profile Upload</title>
+<style>
+  body {
+    background:#0f0f0f;
+    color:white;
+    font-family:Arial;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+  }
+  .card {
+    background:#1b1b1b;
+    padding:20px;
+    border-radius:15px;
+    width:320px;
+    text-align:center;
+  }
+  img {
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    object-fit:cover;
+    margin-bottom:10px;
+    border:2px solid #00eaff;
+  }
+  input, button {
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+  }
+  button {
+    background:#00eaff;
+    border:none;
+    cursor:pointer;
+    border-radius:8px;
+    font-weight:bold;
+  }
+</style>
 </head>
+
 <body>
   <div class="card">
     <h2>Your Profile</h2>
-    <img id="preview" src="default.png" alt="Profile Image" />
-    <input type="file" id="image" />
-    <button onclick="uploadImage()">Upload Image</button>
-    <p id="status"></p>
+    <img id="preview" src="https://via.placeholder.com/150">
+    <input type="file" id="file">
+    <button onclick="upload()">Upload Image</button>
+    <p id="msg"></p>
   </div>
 
-  <script>
-    async function uploadImage() {
-      const file = document.getElementById("image").files[0];
-      if (!file) return alert("Select an image first!");
+<script>
+async function upload() {
+  const file = document.getElementById("file").files[0];
+  if (!file) {
+    alert("Select an image first");
+    return;
+  }
 
-      const form = new FormData();
-      form.append("image", file);
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: reader.result })
+    });
 
-      const res = await fetch("http://localhost:3000/upload", {
-        method: "POST",
-        body: form
-      });
+    const data = await res.json();
+    document.getElementById("preview").src = data.image_url;
+    document.getElementById("msg").innerText = "Image uploaded successfully!";
+  };
 
-      const data = await res.json();
-      document.getElementById("status").innerText = data.message;
-
-      if (data.image_url) {
-        document.getElementById("preview").src = data.image_url;
-      }
-    }
-  </script>
+  reader.readAsDataURL(file);
+}
+</script>
 </body>
 </html>
