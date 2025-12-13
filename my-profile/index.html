@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini Profile</title>
+  <style>
+    body { font-family: Arial; background:#121212; color:white; text-align:center; }
+    .card { width:350px; margin:auto; padding:20px; background:#1d1d1d; border-radius:15px; }
+    img { width:120px; height:120px; border-radius:50%; object-fit:cover; margin-bottom:10px; }
+    input { margin:10px 0; padding:8px; width:100%; }
+    button { padding:10px 15px; background:#00eaff; border:none; cursor:pointer; border-radius:8px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Your Profile</h2>
+    <img id="preview" src="default.png" alt="Profile Image" />
+    <input type="file" id="image" />
+    <button onclick="uploadImage()">Upload Image</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    async function uploadImage() {
+      const file = document.getElementById("image").files[0];
+      if (!file) return alert("Select an image first!");
+
+      const form = new FormData();
+      form.append("image", file);
+
+      const res = await fetch("http://localhost:3000/upload", {
+        method: "POST",
+        body: form
+      });
+
+      const data = await res.json();
+      document.getElementById("status").innerText = data.message;
+
+      if (data.image_url) {
+        document.getElementById("preview").src = data.image_url;
+      }
+    }
+  </script>
+</body>
+</html>
